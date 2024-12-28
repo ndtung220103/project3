@@ -1,15 +1,11 @@
-"""
-swat-s1 topology
-"""
 
 from mininet.topo import Topo
 
 from utils import IP, MAC, NETMASK
 
 
-class SwatTopo(Topo):
+class MyTopo(Topo):
 
-    """SWaT 3 plcs + attacker + private dirs."""
 
     def build(self):
 
@@ -21,17 +17,11 @@ class SwatTopo(Topo):
             mac=MAC['plc1'])
         self.addLink(plc1, switch)
 
-        plc2 = self.addHost(
-            'plc2',
-            ip=IP['plc2'] + NETMASK,
-            mac=MAC['plc2'])
-        self.addLink(plc2, switch)
-
-        plc3 = self.addHost(
-            'plc3',
-            ip=IP['plc3'] + NETMASK,
-            mac=MAC['plc3'])
-        self.addLink(plc3, switch)
+        hmi = self.addHost(
+            'hmi',
+            ip=IP['hmi'] + NETMASK,
+            mac=MAC['hmi'])
+        self.addLink(hmi, switch)
 
         attacker = self.addHost(
             'attacker',

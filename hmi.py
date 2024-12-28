@@ -1,60 +1,44 @@
-
-"""
-swat-s1 plc2
-"""
-
-from minicps.devices import PLC
-from utils import PLC2_DATA, STATE, PLC2_PROTOCOL
-from utils import PLC_SAMPLES, PLC_PERIOD_SEC
-from utils import IP
-
+from minicps.devices import HMI
+from utils import HMI_PROTOCOL, STATE, PLC1_ADDR
+import random
 import time
 
-PLC1_ADDR = IP['plc1']
-PLC2_ADDR = IP['plc2']
-PLC3_ADDR = IP['plc3']
+ALERT = ('alert',)
+PUMP = ('pump',)
 
-FIT201_2 = ('FIT201', 2)
+class MyHMI(HMI):
 
-
-class SwatPLC2(PLC):
-
-    def pre_loop(self, sleep=0.1):
-        print('DEBUG: swat-s1 plc2 enters pre_loop')
-
-        time.sleep(sleep)
-
-    def main_loop(self):
-        """plc2 main loop.
-
-            - read flow level sensors #2
-            - update interal enip server
-        """
-
-        print('DEBUG: swat-s1 plc2 enters main_loop.')
-
+    def main_loop(self, sleep=2):
+        time.sleep(5)
         count = 0
-        while(count <= PLC_SAMPLES):
+        while True:
+            # Receive the current alert state from PLC1
+            alert = int(self.receive(ALERT, PLC1_ADDR))
+            print(f"Received ALERT value: {alert}")
 
-            fit201 = float(self.get(FIT201_2))
-            print("DEBUG PLC2 - get fit201: %f" % fit201)
+            if (alert == 2):
+                print("Water is over.Turning off the pump.")
+                self.send(PUMP, 0, PLC1_ADDR)  # Turn off the pump
+                if(count == 0):
+                    count = random.randint(10, 20)
+                    print(f"Generated count: {count}")
+            elif(alert == 1):
+                print(f"Water is high")
+            else:
+                print(f"Water is normal")
 
-            self.send(FIT201_2, fit201, PLC2_ADDR)
-            # fit201 = self.receive(FIT201_2, PLC2_ADDR)
-            # print("DEBUG PLC2 - receive fit201: ", fit201)
+            if(count > 0):
+                count = count -1
+            else:
+                count = 0
+                self.send(PUMP, 1, PLC1_ADDR)  # Turn on the pump
 
-            time.sleep(PLC_PERIOD_SEC)
-            count += 1
-
-        print('DEBUG swat plc2 shutdown')
-
+            time.sleep(sleep)
 
 if __name__ == "__main__":
-
-    # notice that memory init is different form disk init
-    plc2 = SwatPLC2(
-        name='plc2',
-        state=STATE,
-        protocol=PLC2_PROTOCOL,
-        memory=PLC2_DATA,
-        disk=PLC2_DATA)
+    hmi = MyHMI(
+        name="hmi",
+        protocol=HMI_PROTOCOL,
+        state=STATE
+    )
+    hmi.main_loop()
