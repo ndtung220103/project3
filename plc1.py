@@ -15,16 +15,15 @@ ALERT = ('alert',)
 # TODO: real value tag where to read/write flow sensor
 class PLC1(PLC):
 
-    def pre_loop(self, sleep=2.5):
+    def pre_loop(self, sleep=1.5):
         print('DEBUG:plc1 enters pre_loop')
         time.sleep(sleep)
-        self.send(LEVEL, 1, PLC1_ADDR)
-        self.send(PUMP, 1, PLC1_ADDR)
-        self.send(ALERT, 0, PLC1_ADDR)
 
     def main_loop(self):
         print('DEBUG: plc1 enters main_loop.')
-
+        self.send(LEVEL, 1, PLC1_ADDR)
+        self.send(PUMP, 1, PLC1_ADDR)
+        self.send(ALERT, 0, PLC1_ADDR)
         while True:
 
             level = float(self.get(LEVEL))
