@@ -29,9 +29,9 @@ class RawWaterTank(Tank):
             print(f"pump : {pump}")
 
             if(pump == 1):
-                self.set(LEVEL, level + 1)
+                self.set(LEVEL,level + 1)
             
-            self.set(LEVEL, level)
+            self.set(LEVEL,level)
             if (level > 0.4):
                 self.set(LEVEL,level - 0.4)
             time.sleep(2)
