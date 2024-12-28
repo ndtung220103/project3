@@ -28,12 +28,12 @@ class RawWaterTank(Tank):
             pump  = int(self.get(PUMP))
             print(f"pump : {pump}")
 
-            if(pump == 1):
-                self.set(LEVEL,level + 1)
+            if pump == 1:
+                level += 1
+            if level > 0.4:
+                level -= 0.4
             
             self.set(LEVEL,level)
-            if (level > 0.4):
-                self.set(LEVEL,level - 0.4)
             time.sleep(2)
 
 
