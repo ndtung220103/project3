@@ -15,7 +15,7 @@ ALERT = ('alert',)
 # TODO: real value tag where to read/write flow sensor
 class PLC1(PLC):
 
-    def pre_loop(self, sleep=1.5):
+    def pre_loop(self, sleep=0.5):
         print('DEBUG:plc1 enters pre_loop')
         time.sleep(sleep)
 
@@ -28,7 +28,7 @@ class PLC1(PLC):
 
             level = float(self.get(LEVEL))
             print('DEBUG plc1 level: %.5f' %level)
-
+            #self.send(LEVEL,level , PLC1_ADDR)
             if (level < 20):
                 self.send(ALERT, 0, PLC1_ADDR)
                 print(f"water is normal")

@@ -53,9 +53,9 @@ HMI_DATA = {
 # SPHINX_SWAT_TUTORIAL PLC1 UTILS(
 PLC1_ADDR = IP['plc1']
 PLC1_TAGS = (
-    ('level', 1, 'REAL'),
-    ('pump', 1, 'INT'),
-    ('alert', 1, 'INT'),
+    ('level', 'REAL'),
+    ('pump', 'INT'),
+    ('alert', 'INT'),
 )
 PLC1_SERVER = {
     'address': PLC1_ADDR,

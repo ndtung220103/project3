@@ -9,7 +9,7 @@ PUMP = ('pump',)
 class MyHMI(HMI):
 
     def main_loop(self, sleep=2):
-        time.sleep(10)
+        time.sleep(5)
         count = 0
         while True:
             # Receive the current alert state from PLC1
