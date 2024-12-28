@@ -34,7 +34,7 @@ class RawWaterTank(Tank):
                 level -= 0.4
             
             self.set(LEVEL,level)
-            time.sleep(2)
+            time.sleep(1)
 
 
 if __name__ == '__main__':
