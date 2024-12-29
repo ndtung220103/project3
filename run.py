@@ -26,7 +26,7 @@ class MyCPS(MiniCPS):
         # SPHINX_SWAT_TUTORIAL RUN(
         s1.cmd(sys.executable + ' -u ' + ' physical_process.py  &> logs/process.log &')
         plc1.cmd(sys.executable + ' -u ' + ' plc1.py  &> logs/plc1.log &')
-        hmi.cmd(sys.executable + ' -u ' + ' hmi.py  &> logs/hmi.log &')
+        #hmi.cmd(sys.executable + ' -u ' + ' hmi.py  &> logs/hmi.log &')
         # SPHINX_SWAT_TUTORIAL RUN)
         CLI(self.net)
 
