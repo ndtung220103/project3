@@ -59,4 +59,4 @@ def spoof_pkt(pkt):
         send(newpkt)
 
 # Lọc và chặn gói tin TCP
-pkt = sniff(iface='eth0', filter='tcp', prn=spoof_pkt)
+pkt = sniff(iface='attacker-eth0', filter='tcp', prn=spoof_pkt)
