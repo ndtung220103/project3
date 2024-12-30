@@ -17,6 +17,13 @@ class MyCPS(MiniCPS):
 
         net.start()
 
+        for h in net.hosts:
+            h.cmd('ifconfig %s-eth0 inet6 add 2001:db8::%s/64' % (h.name, str(h.UID)))
+
+        # Kiểm tra cấu hình IPv6
+        for h in net.hosts:
+            print(h.name, h.cmd('ifconfig'))
+
         net.pingAll()
 
         # start devices
