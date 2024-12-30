@@ -39,7 +39,7 @@ def process_packet(packet):
     #             return
 
         # Gửi tiếp các gói tin không phải CIP
-        send(packet)
+    send(packet)
 
 # Chặn và xử lý gói tin
-sniff(filter="ip", prn=process_packet, iface="attacker-eth0")
+sniff(prn=process_packet, iface="attacker-eth0")
