@@ -42,4 +42,4 @@ def process_packet(packet):
     send(packet)
 
 # Chặn và xử lý gói tin
-sniff(prn=process_packet, iface="attacker-eth0")
+sniff(filter="ip", prn=process_packet, iface="attacker-eth0")
