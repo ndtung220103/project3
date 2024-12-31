@@ -2,6 +2,8 @@
 from minicps.devices import PLC
 from utils import PLC1_DATA, STATE, PLC1_PROTOCOL
 from utils import IP
+from cpppo.server.enip.get_attribute import proxy
+
 
 import time
 
@@ -20,6 +22,7 @@ class PLC1(PLC):
         time.sleep(sleep)
 
     def main_loop(self):
+        proxy(host='192.168.1.10', timeout=20.0)
         print('DEBUG: plc1 enters main_loop.')
         self.send(LEVEL, 1, PLC1_ADDR)
         self.send(PUMP, 1, PLC1_ADDR)

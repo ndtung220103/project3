@@ -1,5 +1,6 @@
 from minicps.devices import HMI
 from utils import HMI_PROTOCOL, STATE, PLC1_ADDR
+from cpppo.server.enip.get_attribute import proxy
 import random
 import time
 
@@ -11,6 +12,7 @@ class MyHMI(HMI):
     def main_loop(self, sleep=2):
         time.sleep(5)
         count = 0
+        proxy(host='192.168.1.20', timeout=20.0)
         while True:
             # Receive the current alert state from PLC1
             try:
