@@ -11,11 +11,35 @@ VALID_IP_TO_MAC = {
     "192.168.1.77": "aa:aa:aa:aa:aa:aa",
 }
 
-class AntiARPCachePoisoning (object):
+class AntiARPCachePoisoning(object):
     def __init__(self, connection):
         self.connection = connection
         connection.addListeners(self)
         log.info(f"Protecting switch: {connection.dpid}")
+
+        # Cài đặt các flow rule mặc định
+        self.install_default_flows()
+
+    def install_default_flows(self):
+        """ Cài đặt flow rule mặc định cho ARP và ICMP """
+        log.info("Installing default flows for ARP and ICMP")
+
+        # Rule cho gói ARP (cho phép xử lý ở controller)
+        msg = of.ofp_flow_mod()
+        msg.match.dl_type = 0x0806  # ARP
+        msg.priority = 100  # Ưu tiên thấp
+        msg.actions.append(of.ofp_action_output(port=of.OFPP_CONTROLLER))  # Gửi về controller
+        self.connection.send(msg)
+
+        # Rule cho ICMP (ping)
+        msg = of.ofp_flow_mod()
+        msg.match.dl_type = 0x0800  # IPv4
+        msg.match.nw_proto = 1  # ICMP protocol
+        msg.priority = 100  # Ưu tiên thấp
+        msg.actions.append(of.ofp_action_output(port=of.OFPP_FLOOD))  # Flood đến các cổng
+        self.connection.send(msg)
+
+        log.info("Default flows installed successfully")
 
     def _handle_PacketIn(self, event):
         """
