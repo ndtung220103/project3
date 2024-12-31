@@ -79,8 +79,6 @@ class AntiARPCachePoisoning (object):
         log.info(f"Switch {event.connection.dpid} has connected")
         self.add_flow(event.dpid, 1, 2)  # Thêm flow từ cổng 1 đến cổng 2
         self.add_flow(event.dpid, 2, 1)
-        self.add_flow(event.dpid, 3, 1)
-        self.add_flow(event.dpid, 3, 2)
 
     def add_flow(self, dpid, in_port, out_port):
         """
