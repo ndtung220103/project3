@@ -31,6 +31,12 @@ class AntiARPCachePoisoning (object):
         if arp:
             self._handle_arp(event, arp)
 
+        # Phân tích gói ICMP (ping)
+        icmp = packet.find("icmp")
+        ip = packet.find("ipv4")
+        if icmp and ip:
+            self._handle_icmp(event, ip)
+
     def _handle_arp(self, event, arp):
         """
         Phát hiện và xử lý các gói ARP Poisoning.
@@ -50,6 +56,26 @@ class AntiARPCachePoisoning (object):
             self.block_attacker(event, arp)
         else:
             log.info("Valid ARP packet received")
+
+    def _handle_icmp(self, event, ip):
+        """
+        Xử lý gói tin ICMP (ping) từ attacker.
+        """
+        src_ip = str(ip.srcip)
+        src_mac = str(event.parsed.src)
+
+        log.info(f"Received ICMP packet: {src_mac} -> {src_ip}")
+
+        valid_mac = VALID_IP_TO_MAC.get(src_ip)
+        if valid_mac and valid_mac == src_mac:
+            log.info(f"Valid ICMP packet from attacker ({src_ip}) with MAC {src_mac}")
+            # Chuyển tiếp gói tin ICMP nếu hợp lệ
+            msg = of.ofp_packet_out()
+            msg.data = event.ofp
+            msg.actions.append(of.ofp_action_output(port=of.OFPP_FLOOD))
+            self.connection.send(msg)
+        else:
+            log.warning(f"ICMP packet dropped: Invalid MAC {src_mac} for IP {src_ip}")
 
     def block_attacker(self, event, arp):
         """
@@ -77,8 +103,8 @@ class AntiARPCachePoisoning (object):
         Khi có kết nối đến switch, thêm flow rule.
         """
         log.info(f"Switch {event.connection.dpid} has connected")
-        # self.add_flow(event.dpid, 1, 2)  # Thêm flow từ cổng 1 đến cổng 2
-        # self.add_flow(event.dpid, 2, 1)
+        self.add_flow(event.dpid, 1, 2)  # Thêm flow từ cổng 1 đến cổng 2
+        self.add_flow(event.dpid, 2, 1)
 
     def add_flow(self, dpid, in_port, out_port):
         """

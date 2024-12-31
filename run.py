@@ -27,7 +27,7 @@ class MyCPS(MiniCPS):
         for h in net.hosts:
             print(h.name, h.cmd('ifconfig'))
 
-        net.pingAll()
+        #net.pingAll()
 
         # start devices
         plc1, hmi, attacker, s1 = self.net.get(
