@@ -6,8 +6,9 @@ log = core.getLogger()
 
 # Danh sách ánh xạ IP-to-MAC hợp lệ
 VALID_IP_TO_MAC = {
-    "192.168.1.10": "00:1D:9C:C7:B0:10",  # plc1
-    "192.168.1.20": "00:1D:9C:C8:BC:20",  # hmi
+    "192.168.1.10": "00:1d:9c:c7:b0:10",  # plc1
+    "192.168.1.20": "00:1d:9c:c8:bc:20",  # hmi
+    "192.168.1.77": "aa:aa:aa:aa:aa:aa",
 }
 
 class AntiARPCachePoisoning (object):
@@ -38,6 +39,8 @@ class AntiARPCachePoisoning (object):
 
         # Kiểm tra ánh xạ IP-to-MAC
         valid_mac = VALID_IP_TO_MAC.get(str(arp.protosrc))
+        log.info(f"valid mac: {valid_mac}")
+        log.info(f"mac src: {str(arp.hwsrc)}")
         if valid_mac and valid_mac != str(arp.hwsrc):
             # Phát hiện tấn công ARP Poisoning
             log.warning(f"ARP Poisoning detected: {arp.hwsrc} is spoofing {arp.protosrc}")
