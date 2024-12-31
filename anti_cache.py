@@ -8,7 +8,7 @@ log = core.getLogger()
 VALID_IP_TO_MAC = {
     "192.168.1.10": "00:1d:9c:c7:b0:10",  # plc1
     "192.168.1.20": "00:1d:9c:c8:bc:20",  # hmi
-    "192.168.1.77": "aa:aa:aa:aa:aa:aa",
+    "192.168.1.77": "aa:aa:aa:aa:aa:aa",  # attacker (ví dụ)
 }
 
 class AntiARPCachePoisoning (object):
@@ -41,6 +41,7 @@ class AntiARPCachePoisoning (object):
         valid_mac = VALID_IP_TO_MAC.get(str(arp.protosrc))
         log.info(f"valid mac: {valid_mac}")
         log.info(f"mac src: {str(arp.hwsrc)}")
+        
         if valid_mac and valid_mac != str(arp.hwsrc):
             # Phát hiện tấn công ARP Poisoning
             log.warning(f"ARP Poisoning detected: {arp.hwsrc} is spoofing {arp.protosrc}")
@@ -61,6 +62,33 @@ class AntiARPCachePoisoning (object):
         msg.actions = []  # Drop packet
         self.connection.send(msg)
         log.info(f"Blocked packets from {arp.hwsrc}")
+
+        # Cài đặt flow để chặn IP giả mạo vĩnh viễn
+        block_ip_flow = of.ofp_flow_mod()
+        block_ip_flow.match = of.ofp_match(dl_type=0x0806, nw_src=IPAddr(arp.protosrc))
+        block_ip_flow.actions = []  # Drop ARP từ attacker
+        block_ip_flow.idle_timeout = 0
+        block_ip_flow.hard_timeout = 0  # Flow sẽ tồn tại lâu dài
+        self.connection.send(block_ip_flow)
+        log.info(f"Blocked ARP requests from IP: {arp.protosrc}")
+
+    def _handle_ConnectionUp(self, event):
+        """
+        Khi có kết nối đến switch, thêm flow rule.
+        """
+        log.info(f"Switch {event.connection.dpid} has connected")
+        self.add_flow(event.dpid, 1, 2)  # Thêm flow từ cổng 1 đến cổng 2
+        self.add_flow(event.dpid, 2, 1)
+        
+    def add_flow(self, dpid, in_port, out_port):
+        """
+        Lệnh thêm flow.
+        """
+        flow_mod = of.ofp_flow_mod()
+        flow_mod.match = of.ofp_match(in_port=in_port)
+        flow_mod.actions.append(of.ofp_action_output(port=out_port))
+        self.connection.send(flow_mod)
+        log.info(f"Added flow from port {in_port} to port {out_port} on switch {dpid}")
 
 def launch():
     """
