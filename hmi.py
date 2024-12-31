@@ -13,8 +13,11 @@ class MyHMI(HMI):
         count = 0
         while True:
             # Receive the current alert state from PLC1
-            alert = int(self.receive(ALERT, PLC1_ADDR))
-            print(f"Received ALERT value: {alert}")
+            try:
+                alert = int(self.receive(ALERT, PLC1_ADDR))
+                print(f"Received ALERT value: {alert}")
+            except:
+                print(f"exeption while connect")
 
             if (alert == 2):
                 print("Water is over.Turning off the pump.")
@@ -31,8 +34,10 @@ class MyHMI(HMI):
                 count = count -1
             else:
                 count = 0
-                self.send(PUMP, 1, PLC1_ADDR)  # Turn on the pump
-
+                try:
+                    self.send(PUMP, 1, PLC1_ADDR)  # Turn on the pump
+                except:
+                    print(f"can't connect to plc")
             time.sleep(sleep)
 
 if __name__ == "__main__":
