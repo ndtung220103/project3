@@ -33,12 +33,12 @@ class MyCPS(MiniCPS):
         plc1, hmi, attacker, s1 = self.net.get(
             'plc1', 'hmi', 'attacker', 's1')
 
-        plc1.setARP(ip='192.168.1.20', mac='00:1D:9C:C8:BC:20')
-        plc1.setARP(ip='192.168.1.77', mac='AA:AA:AA:AA:AA:AA')
-        hmi.setARP(ip='192.168.1.10', mac='00:1D:9C:C7:B0:10')
-        hmi.setARP(ip='192.168.1.77', mac='AA:AA:AA:AA:AA:AA')
-        attacker.setARP(ip='192.168.1.20', mac='00:1D:9C:C8:BC:20')
-        attacker.setARP(ip='192.168.1.10', mac='00:1D:9C:C7:B0:10')
+        # plc1.setARP(ip='192.168.1.20', mac='00:1D:9C:C8:BC:20')
+        # plc1.setARP(ip='192.168.1.77', mac='AA:AA:AA:AA:AA:AA')
+        # hmi.setARP(ip='192.168.1.10', mac='00:1D:9C:C7:B0:10')
+        # hmi.setARP(ip='192.168.1.77', mac='AA:AA:AA:AA:AA:AA')
+        # attacker.setARP(ip='192.168.1.20', mac='00:1D:9C:C8:BC:20')
+        # attacker.setARP(ip='192.168.1.10', mac='00:1D:9C:C7:B0:10')
 
         # SPHINX_SWAT_TUTORIAL RUN(
         s1.cmd(sys.executable + ' -u ' + ' physical_process.py  &> logs/process.log &')
