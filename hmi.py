@@ -16,28 +16,26 @@ class MyHMI(HMI):
             try:
                 alert = int(self.receive(ALERT, PLC1_ADDR))
                 print(f"Received ALERT value: {alert}")
-            except:
-                print(f"exeption while connect")
+           
 
-            if (alert == 2):
-                print("Water is over.Turning off the pump.")
-                self.send(PUMP, 0, PLC1_ADDR)  # Turn off the pump
-                if(count == 0):
-                    count = random.randint(10, 20)
-                    print(f"Generated count: {count}")
-            elif(alert == 1):
-                print(f"Water is high")
-            else:
-                print(f"Water is normal")
+                if (alert == 2):
+                    print("Water is over.Turning off the pump.")
+                    self.send(PUMP, 0, PLC1_ADDR)  # Turn off the pump
+                    if(count == 0):
+                        count = random.randint(10, 20)
+                        print(f"Generated count: {count}")
+                elif(alert == 1):
+                    print(f"Water is high")
+                else:
+                    print(f"Water is normal")
 
-            if(count > 0):
-                count = count -1
-            else:
-                count = 0
-                try:
+                if(count > 0):
+                    count = count -1
+                else:
+                    count = 0
                     self.send(PUMP, 1, PLC1_ADDR)  # Turn on the pump
-                except:
-                    print(f"can't connect to plc")
+            except:
+                print(f"can't connect to plc")
             time.sleep(sleep)
 
 if __name__ == "__main__":
