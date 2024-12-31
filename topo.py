@@ -1,5 +1,7 @@
 
 from mininet.topo import Topo
+from mininet.node import OVSSwitch
+
 
 from utils import IP, MAC, NETMASK
 
@@ -9,7 +11,7 @@ class MyTopo(Topo):
 
     def build(self):
 
-        switch = self.addSwitch('s1')
+        switch = self.addSwitch('s1', cls=OVSSwitch)
 
         plc1 = self.addHost(
             'plc1',
