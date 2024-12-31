@@ -9,7 +9,7 @@ PUMP = ('pump',)
 
 class MyHMI(HMI):
 
-    def main_loop(self, sleep=10):
+    def main_loop(self, sleep=2):
         time.sleep(5)
         count = 0
         proxy(host='192.168.1.20', timeout=20.0)
@@ -24,7 +24,7 @@ class MyHMI(HMI):
                     print("Water is over.Turning off the pump.")
                     self.send(PUMP, 0, PLC1_ADDR)  # Turn off the pump
                     if(count == 0):
-                        count = random.randint(2, 4)
+                        count = random.randint(10, 20)
                         print(f"Generated count: {count}")
                 elif(alert == 1):
                     print(f"Water is high")
