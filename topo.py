@@ -1,6 +1,6 @@
 
 from mininet.topo import Topo
-from mininet.node import OVSSwitch
+from mininet.node import RemoteController, OVSSwitch
 
 
 from utils import IP, MAC, NETMASK

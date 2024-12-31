@@ -2,6 +2,8 @@
 from mininet.net import Mininet
 from mininet.cli import CLI
 from minicps.mcps import MiniCPS
+from mininet.node import RemoteController, OVSSwitch
+
 
 from topo import MyTopo
 
@@ -43,7 +45,9 @@ class MyCPS(MiniCPS):
 if __name__ == "__main__":
 
     topo = MyTopo()
-    net = Mininet(topo=topo)
+    controller = RemoteController('pox', ip='127.0.0.1', port=6633)  # POX chạy ở cổng 6633
+
+    net = Mininet(topo=topo, controller=controller)
 
     swat_s1_cps = MyCPS(
         name='project3',
